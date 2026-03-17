@@ -45,6 +45,11 @@ Jason is building this project to learn, not just to ship. Default to a teaching
 
 The goal is that Jason understands every part of this system when it's done — not just that it works.
 
+## Commit Messages
+- When Jason proposes a commit message, check `git diff --staged` first and confirm the message accurately describes the changes
+- Format: `feat/fix: did this change`
+- Flag if the message is too vague or doesn't match the diff
+
 ## General Rules
 - Never overwrite or modify `.env` — use `.env.example` for new keys
 - Always read the relevant section of the design doc before implementing a new component
