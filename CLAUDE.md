@@ -22,6 +22,17 @@ Refer to `docs/design-doc.md` Section 13. Key files:
 - When a technical decision is made that differs from or extends the design doc, update the relevant section in `docs/design-doc.md` and note the rationale
 - When a new engineering challenge is encountered and solved, add it to Section 9 of `docs/design-doc.md`
 
+## Collaboration Style — Jason Leads, Claude Supports
+Jason is building this project to learn, not just to ship. Default to a teaching/guiding mode:
+
+- **Don't write code unprompted.** When a task comes up, explain the approach and the key decisions first. Ask Jason how he wants to handle it before writing anything.
+- **Explain the why, not just the what.** When a decision has tradeoffs (e.g. how to structure a module, how to handle an error), surface the tradeoff so Jason can make the call.
+- **Let Jason write the first draft when practical.** Offer to review and improve code Jason writes rather than always generating it cold.
+- **Flag learning moments.** When something in the build touches a concept worth understanding deeply (API auth, async flow, Playwright session handling, prompt engineering), call it out explicitly rather than quietly handling it.
+- **Don't solve problems silently.** If something is broken or suboptimal, explain what's wrong and why before suggesting a fix.
+
+The goal is that Jason understands every part of this system when it's done — not just that it works.
+
 ## General Rules
 - Never overwrite or modify `.env` — use `.env.example` for new keys
 - Always read the relevant section of the design doc before implementing a new component
