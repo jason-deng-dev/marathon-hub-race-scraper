@@ -1,0 +1,49 @@
+- [ ]  Setup
+    - [ ]  Initialize repo
+    - [ ]  Set up Node.js project (npm init)
+    - [ ]  Install dependencies (axios, cheerio, node-cron)
+    - [ ]  Set up .env
+    - [ ]  Set up .gitignore
+- [ ]  Build scraper.js
+    - [ ]  Inspect RunJapan HTML structure
+    - [ ]  Define SELECTORS config object
+    - [ ]  Scrape race listings
+        - [ ]  Race name
+        - [ ]  Date + location + prefecture
+        - [ ]  Distance
+        - [ ]  Entry fee
+        - [ ]  Description
+        - [ ]  Registration URL + deadline
+        - [ ]  Images
+    - [ ]  Write output to races.json
+    - [ ]  Add validation (abort if <20 races returned)
+- [ ]  Build normalizer.js
+    - [ ]  Date format normalization
+    - [ ]  Distance categorization
+    - [ ]  Entry status derivation
+    - [ ]  Null handling
+    - [ ]  Deduplication
+- [ ]  Wire daily cron
+    - [ ]  scrape → normalize → log
+    - [ ]  Set schedule (2am JST)
+- [ ]  WordPress integration
+    - [ ]  Build WP plugin (race custom post type)
+    - [ ]  Set up Application Password
+    - [ ]  Deploy + activate WP plugin
+    - [ ]  Build wp-sync.js with idempotency
+    - [ ]  Wire wp-sync into cron
+- [ ]  Express API
+    - [ ]  Initialize Express server
+    - [ ]  Implement GET /api/races with query params
+    - [ ]  Implement GET /api/races/:id
+    - [ ]  Implement GET /api/races/upcoming
+    - [ ]  Implement POST /api/sync manual trigger
+- [ ]  React frontend
+    - [ ]  Initialize React app (Vite)
+    - [ ]  Race listing page
+    - [ ]  Filter panel
+    - [ ]  Race detail view
+    - [ ]  Loading / empty / error states
+- [ ]  Deploy
+
+---
