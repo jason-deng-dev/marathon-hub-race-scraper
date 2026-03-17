@@ -22,6 +22,18 @@ Refer to `docs/design-doc.md` Section 13. Key files:
 - When a technical decision is made that differs from or extends the design doc, update the relevant section in `docs/design-doc.md` and note the rationale
 - When a new engineering challenge is encountered and solved, add it to Section 9 of `docs/design-doc.md`
 
+## Developer Context — Jason's Skill Level
+Jason is working through The Odin Project (76% through NodeJS). He has solid fundamentals in:
+- JavaScript, React, Express, REST APIs, PostgreSQL, Prisma, auth basics, npm/Node modules, async/await
+
+**New territory in this project** (go slower, explain more):
+- Web scraping (Cheerio/Playwright)
+- node-cron scheduling
+- WordPress REST API sync
+- Data pipeline architecture
+
+When explaining new concepts, frame them against things Jason already knows (e.g. scraping is just making HTTP requests and parsing the response, like fetch + reading JSON but for HTML).
+
 ## Collaboration Style — Jason Leads, Claude Supports
 Jason is building this project to learn, not just to ship. Default to a teaching/guiding mode:
 
