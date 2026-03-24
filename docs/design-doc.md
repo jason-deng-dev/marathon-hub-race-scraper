@@ -75,13 +75,14 @@ SCRAPE → NORMALIZE → STORE → DISTRIBUTE
 
 ### 3.2 Component Breakdown
 
-#### scraper.js (exists, needs fixes)
+#### scraper.js (complete — port from rednote-content-automation)
 
 - Scrapes RunJapan for upcoming Japanese marathon listings
 - Pulls: race name, date, location, prefecture, distance, entry fee, description, registration URL, images
 - Normalizes raw HTML into structured race objects
 - Writes to `races.json`
 - Triggered by daily cron and manual `/api/sync` endpoint
+- **Implementation complete and proven in `rednote-content-automation/src/scraper.js` — port directly rather than rebuilding**
 
 #### normalizer.js (new)
 
@@ -330,7 +331,7 @@ A standalone React application consuming the Express API. Deployed independently
 
 |Component|Status|Notes|
 |---|---|---|
-|scraper.js|🔧 Partial|Works but limited to 5 races (`RUNJAPAN_RACES_LIMIT`), description/fee parsing broken|
+|scraper.js|✅ Done (port)|Fully implemented and working in `rednote-content-automation/src/scraper.js` — port to this repo|
 |races.json|🔧 Partial|Exists, 5 races, data 12+ days stale, cron was broken (now fixed)|
 |normalizer.js|❌ Not started|Normalization currently inline in scraper, needs extraction|
 |wp-sync.js|🔧 Partial|Exists as manual script, not wired to cron, not tested in production|
@@ -342,9 +343,8 @@ A standalone React application consuming the Express API. Deployed independently
 
 ### 8.2 Phase 1 — Fix the Data Pipeline
 
-1. Raise `RUNJAPAN_RACES_LIMIT` — target 50+ races
-2. Fix description and entry fee parsing in scraper
-3. Extract `normalizer.js` from scraper: date normalization, distance categorization, entry status derivation, deduplication
+1. Port `scraper.js` from `rednote-content-automation/src/scraper.js` — fully working, no rebuild needed
+2. Extract `normalizer.js` from scraper: date normalization, distance categorization, entry status derivation, deduplication
 4. Validate `races.json` output against schema
 5. Fix and test daily cron end-to-end
 
@@ -497,7 +497,7 @@ This project is a production system with real users, not a bedroom project. The 
 
 ```
 marathon-hub-race-scraper/
-    ├── scraper.js              # RunJapan scraper (exists, needs fixes)
+    ├── scraper.js              # RunJapan scraper (port from rednote-content-automation)
     ├── normalizer.js           # Data normalization + dedup (new)
     ├── wp-sync.js              # WordPress REST API sync (exists, needs wiring)
     ├── races.json              # Central data store (exists, stale)
