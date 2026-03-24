@@ -307,7 +307,7 @@ A standalone React application consuming the Express API. Deployed independently
 |API client|fetch / axios|Simple REST, no GraphQL overhead needed|
 |Backend|Express + Node.js|Consistent with rest of stack|
 |Data|races.json (file read)|Lowest coupling — no DB required for portfolio deployment|
-|Deployment|Railway / Render|Simple Node + static hosting, free tier available|
+|Deployment|AWS Lightsail|Same instance as other pipelines (rednote-content-automation)|
 
 ---
 
@@ -367,7 +367,7 @@ A standalone React application consuming the Express API. Deployed independently
 2. Implement `/api/sync` manual trigger with secret key auth
 3. Build React SPA: listing page, filter panel, detail view, loading/error/empty states
 4. Add `pipeline.log` logging across all stages
-5. Deploy Express API + React frontend to Railway or Render
+5. Deploy Express API + React frontend to AWS Lightsail (same instance as other pipelines)
 
 **Exit criteria:** Portfolio frontend is live at a public URL, independently of WordPress. All filters work. Manual sync trigger works.
 
@@ -397,7 +397,7 @@ A standalone React application consuming the Express API. Deployed independently
 
 **Challenge:** The portfolio app must remain live and usable even if the production WordPress site goes down or the job ends.
 
-**Solution:** The React SPA reads directly from the Express API, which reads from `races.json`. The Express API is deployed independently of WordPress on a separate host (Railway/Render). The only dependency is the Express server staying live. If the daily cron for RunJapan scraping also runs on the same server, the data stays fresh without any WordPress involvement.
+**Solution:** The React SPA reads directly from the Express API, which reads from `races.json`. The Express API is deployed on AWS Lightsail alongside the other pipelines (rednote-content-automation), independently of WordPress. The only dependency is the Express server staying live. If the daily cron for RunJapan scraping also runs on the same server, the data stays fresh without any WordPress involvement.
 
 ### 9.5 Bot Detection on RunJapan
 
@@ -487,7 +487,7 @@ This project is a production system with real users, not a bedroom project. The 
 - **RunJapan scraper robustness:** How frequently does RunJapan's markup change? Should we add a Slack/email alert when the scraper returns suspiciously few races?
 - **Image handling:** Should race images be downloaded and hosted locally, or hotlinked from RunJapan? Hotlinking is simpler but fragile.
 - **WP plugin deployment:** What's the deployment process for the plugin — FTP, WP admin upload, or server SSH? Needs confirming with hosting setup.
-- **Portfolio hosting:** Railway vs Render vs Fly.io — compare free tier persistence and cold start behaviour for the Express server.
+- **Portfolio hosting:** Express API + React frontend will run on the same AWS Lightsail instance as the other pipelines — confirm port allocation and reverse proxy config (nginx).
 - **Expanding beyond RunJapan:** In v2, is there value in adding JogNote or marathon-link.com as additional sources? Would require a source field in races.json and dedup logic across sources.
 - **Race detail pages on WP:** Should each WP race post have a standalone page, or is a single hub page with all races sufficient for v1?
 
