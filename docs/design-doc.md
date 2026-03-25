@@ -50,39 +50,65 @@ Race data needs to be:
 ## 2. Architecture
 
 ```
-SCRAPE → races.json → Express API (Lightsail VPS)
-                            ↓
-                    React SPA (WordPress plugin/shortcode)
-                            ↓
-                    running.moximoxi.net/racehub/
+┌──────────────── AWS Lightsail VPS (docker-compose) ────────────────┐
+│                                                                     │
+│  [Scraper container]              [Race Hub container]              │
+│   cron: scraper.js weekly          Express :3001 (always up)        │
+│   no HTTP server                   GET /api/races                   │
+│   pure cron process                GET /api/races/:id               │
+│          │                         GET /api/races/upcoming          │
+│          │ writes                         │                         │
+│          ▼                               │ reads                    │
+│    scraper/races.json  ◄─────────────────┘                          │
+│    (shared volume)                                                  │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                  HTTPS
+                              GET /api/races
+                                    │
+                                    ▼
+                       [WordPress plugin on running.moximoxi.net]
+                        React SPA bundled as WP plugin
+                        shortcode: [race_hub]
+                        fetches from Race Hub API on page load
+                        renders race listing + detail views
+                                    │
+                                    ▼
+                       running.moximoxi.net/racehub/
 ```
 
-The React SPA is bundled and registered as a WordPress plugin. It fetches from the Express API on page load. WordPress just hosts the shortcode — all data and logic lives on the VPS.
+**Scraper and Race Hub are separate containers.** The Scraper is a pure cron process — no HTTP server, no persistent process. The Race Hub is a persistent Express server that reads `races.json` from the shared volume. They are decoupled: the scraper just writes a file, the Race Hub just serves it. Either can be restarted independently.
+
+**How WordPress receives the data:** The React SPA is bundled (Vite) and registered as a WordPress plugin. When a visitor loads the race hub page, the browser makes a `GET /api/races` request directly to the Race Hub container on Lightsail. WordPress just hosts the shortcode and the bundled JS/CSS — all data and logic live on the VPS. CORS is configured on the Race Hub to allow requests from `running.moximoxi.net`.
 
 ---
 
 ## 3. Component Breakdown
 
-#### scraper.js (port from rednote-content-automation)
+#### Scraper container
 
-- Scrapes RunJapan for upcoming Japanese marathon listings
+- Pure cron process — no HTTP server
+- Scrapes RunJapan weekly for upcoming Japanese marathon listings
 - Pulls: race name, date, location, entry period, description, registration URL, images, entry status
-- Writes to `races.json`
-- **Fully implemented in `rednote-content-automation/src/scraper.js` — port directly**
+- Writes `scraper/races.json` and `scraper/run_log.json` to the shared volume
+- **Core scraping logic fully implemented in `rednote-content-automation/src/scraper.js` — port directly**
 
-#### races.json (central data store)
+#### Race Hub container
 
-- Single source of truth
-- Written by scraper, read by Express API
-- Includes `last_updated` timestamp
-
-#### Express API server
-
-- Reads from `races.json`
+- Persistent Express server (always up, separate from the scraper)
+- Reads `scraper/races.json` from the shared volume
 - Exposes `GET /api/races` with filtering query params
 - Exposes `GET /api/races/:id` for race detail
-- Exposes `POST /api/sync` manual trigger (auth-protected)
-- Runs on AWS Lightsail alongside other pipelines
+- Exposes `GET /api/races/upcoming` for date-filtered listing
+- CORS configured to allow requests from `running.moximoxi.net`
+- Receives manual sync trigger from the dashboard (`POST /api/sync`, auth-protected)
+
+#### races.json (shared volume)
+
+- Lives at `scraper/races.json` on the shared Docker volume
+- Written by the Scraper container, read by the Race Hub container and the XHS automation container
+- Includes `last_updated` timestamp — used by dashboard to show data freshness
 
 #### React SPA (WordPress plugin)
 
@@ -242,12 +268,17 @@ The React SPA is bundled and registered as a WordPress plugin. It fetches from t
 
 ```
 marathon-hub-race-scraper/
-    ├── scraper.js              # RunJapan scraper (port from rednote-content-automation)
-    ├── races.json              # Central data store
-    ├── pipeline.log            # Run log
-    ├── server/
-    │   └── index.js            # Express API server
+    ├── scraper/                    # Scraper container (pure cron, no HTTP)
+    │   ├── scraper.js              #   RunJapan scraper (port from rednote-content-automation)
+    │   ├── Dockerfile
+    │   └── package.json
+    ├── race-hub/                   # Race Hub container (persistent Express server)
+    │   ├── server.js               #   Express API — GET /api/races, /api/races/:id, /api/races/upcoming
+    │   ├── Dockerfile
+    │   └── package.json
     └── wp-plugin/
-        ├── race-hub.php        # WordPress plugin (registers shortcode)
-        └── dist/               # Vite build output (bundled React SPA)
+        ├── race-hub.php            # WordPress plugin (registers [race_hub] shortcode, enqueues assets)
+        └── dist/                   # Vite build output (bundled React SPA — fetches from Race Hub API)
 ```
+
+**Note:** `scraper/races.json` and `scraper/run_log.json` live on the shared Docker volume at runtime — not committed to the repo.
